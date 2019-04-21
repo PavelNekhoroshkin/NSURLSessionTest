@@ -36,21 +36,15 @@
     UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 30, self.view.frame.size.width, 50)];
     searchBar.delegate = self.searchBarDelegate;
     
-//    searchBar.searchBarStyle = UISearchBarStyleDefault;
-    
-//    показывает кнопку Cancel
-//    searchBar.showsCancelButton = YES;
-    
-//    показывает клавиатуру сразу
-//    [searchBar becomeFirstResponder];
-    
+    searchBar.searchBarStyle = UISearchBarStyleDefault;
+
     self.searchBar = searchBar;
     [self.view addSubview:searchBar];
     
     UICollectionViewFlowLayout *layout=[[UICollectionViewFlowLayout alloc] init];
-    layout.itemSize = CGSizeMake(CGRectGetWidth(self.view.frame)/2 - 5, CGRectGetWidth(self.view.frame)/2 - 5);
-    layout.minimumInteritemSpacing = 5;
-    
+    layout.itemSize = CGSizeMake(CGRectGetWidth(self.view.frame)/2, CGRectGetWidth(self.view.frame)/2);
+    layout.minimumInteritemSpacing = 0;
+    layout.minimumLineSpacing = 0;
     UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 80, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) collectionViewLayout:layout];
     collectionView.dataSource = self;
     collectionView.delegate = self;
@@ -74,36 +68,42 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     //идентификатор рисунка
-    NSString *pictureId = [self.dataStore.pictureIds objectAtIndex:indexPath.row];
+    NSString *idPicture = [self.dataStore.pictureIds objectAtIndex:indexPath.row];
     //загруженный рисунок
-    NSData *pictureData =  [self.dataStore.minPhotoNSData objectForKey:pictureId];
+    NSData *imageData =  [self.dataStore.minPhotoNSData objectForKey:idPicture];
     
     CollectionViewCell *cell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
     if(!cell)
     {
         cell = [[CollectionViewCell alloc] init];
     }
-    if(pictureData){
-        [cell.imageView setImage:[UIImage imageWithData:pictureData]];
-        NSString *title = [[self.dataStore.photoParams objectForKey:pictureId] objectForKey:@"title"];
-        [cell.titleLabel setText:title];
-//        cell.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageWithData:pictureData]];
-    }
     
+    if(imageData){
+        [cell.imageView setImage:[UIImage imageWithData:imageData]];
+        NSString *title = [[self.dataStore.photoParams objectForKey:idPicture] objectForKey:@"title"];
+        [cell.titleLabel setText:title];
+        cell.indexPath = indexPath;
+        cell.controller = self;
+        
+        //если не было просмотра картинок, то для уведомлений будет использована первая загруженная картинка
+        if(indexPath.row == 0 && self.dataStore.searchStarted )
+        {
+            //установить первую найденную картинку, как рисунок для уведомлений
+            self.dataStore.noitficationPicture = idPicture;
+            self.dataStore.noitficationMaxPicture = nil;
+            
+            //новая картинка установлена, сбросить признак нового поиска
+            self.dataStore.searchStarted = nil;
+            
+            [self createNotification:self.searchBar.text];
+        }
+    }
     return cell;
-
 }
 
 #pragma mark - UICollectionViewDelegate
-
-// Methods for notification of selection/deselection and highlight/unhighlight events.
-// The sequence of calls leading to selection from a user touch is:
-//
-// (when the touch begins)
-// 4. -collectionView:didSelectItemAtIndexPath: or -collectionView:didDeselectItemAtIndexPath:
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    
     NSString *idPicture = [self.dataStore.pictureIds objectAtIndex:indexPath.row];
     NSData *pictureData = [self.dataStore.maxPhotoNSData objectForKey:idPicture];
     NSString *isStartedDownload = [self.dataStore.maxPhotoStartDownload objectForKey:idPicture];
@@ -112,22 +112,24 @@
     pictureViewController.idPicture = idPicture;
     pictureViewController.dataStore = self.dataStore;
     self.downloadController.pictureViewController = pictureViewController;
-    
+
     //Если картинка не загружена и не в процессе загрузки, то инициировать загрузку
     if(!pictureData && !isStartedDownload)
     {
         NSString *maxPictureURL = [[self.dataStore.pictureURLs objectForKey:idPicture] objectForKey:@"max"];
         [self.downloadController downloadMaxPictureWithURL:(NSString *)maxPictureURL idPicture:(NSString *)idPicture];
+        self.dataStore.noitficationPicture = idPicture;
+
     }
-    
+
     //Если картинка загружена, то задать данные картинки для последующего использования в методе viewDidLoad
     if (pictureData)
     {
-    
         pictureViewController.pictureData = pictureData;
+        self.dataStore.noitficationMaxPicture = idPicture;
 
     }
-    
+
     [self presentViewController:pictureViewController animated:YES completion:^{}];
 }
 
@@ -140,10 +142,9 @@
 - (void) showErrorAlert
 {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"ОШИБКА" message:@"Не удалось загрузить данные." preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action){
-//        [alertController dismissViewControllerAnimated:YES completion:nil];
-        
-    }];
+    
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action){}];
+    
     [alertController addAction:okAction];
     
     [self presentViewController:alertController animated:YES completion:^{}];
@@ -151,5 +152,34 @@
 }
 
 
+/**
+ Генерирует уведомление с предложением найти кошек,
+ которое будет показано в только при открытом приложении через 3 секунды после любого поиска кроме строк "Cat" или "Cats"
+ 
+ @param searchText последняя строка поиска
+ */
+- (void) createNotification:(NSString *)searchText
+{
+    [self.notificationGenerator createCatSearchNotificationWithSearchText:searchText];
+}
+
+/**
+ Установить строку поиска как для поиска котов (если в уведомлении нажали кнопку "найти котов")
+ */
+- (void)  setSearchBarStringForCats
+{
+    self.searchBar.text = @"Cat";
+}
+
+
+/**
+ Метод для поиска кошек, вызывается, если пользователь согласился искать кошек по увеломлению в активном приложении
+ */
+- (void) searchFromNotificationWithString:(NSString *)searchString
+{
+    [self.downloadController sendSearchRequest:searchString];
+    self.dataStore.noitficationMaxPicture = nil;
+    self.dataStore.searchStarted = @"Search started";
+}
 
 @end

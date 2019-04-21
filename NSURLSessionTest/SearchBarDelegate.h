@@ -9,12 +9,14 @@
 #import <UIKit/UIKit.h>
 #import "DataStore.h"
 #import "DownloadController.h"
+#import "NotificationGenerator.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SearchBarDelegate : NSObject   <UISearchBarDelegate>
 @property (nonatomic, weak) DownloadController *downloadController;
 @property (nonatomic, weak) DataStore *dataStore;
+@property (nonatomic, weak) NotificationGenerator *notificationGenerator;
 
 @end
 

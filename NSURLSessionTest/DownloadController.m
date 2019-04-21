@@ -18,55 +18,54 @@
 - (void) sendSearchRequest:(NSString *)searchText
 {
 //    [self.controller performSelectorOnMainThread:@selector(showErrorAlert) withObject:nil waitUntilDone:NO];
-
+    self.dataStore.searchText = searchText;
     [self.sessionController downloadSearchResult:searchText];
 
 }
 
 
+/**
+ Обрабатывает результат первого запроса
 
-//из последовательной очереди делегата сессии (один поток)
+ @param data JSON со списком рисунков
+ @param error информация об ошибках
+ */
 - (void) proceedSearchResult:(NSData *)data error:(NSError * _Nullable)error
 {
-
     if (!data)
     {
         [self.controller performSelectorOnMainThread:@selector(showErrorAlert) withObject:nil waitUntilDone:NO];
         return;
     }
     NSDictionary *parcedSearchResult = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
-//    NSLog(@"%@", parcedSearchResult);
-    
     
     NSArray *photoParamsArray = [[parcedSearchResult objectForKey:@"photos"] objectForKey:@"photo"];
     
     self.dataStore.pictureIds = [[NSMutableArray alloc] init];
     
     NSMutableDictionary *photoParamsDictonary = [[NSMutableDictionary alloc] init];
-    int i = 0;
-    for (id pictureData in photoParamsArray) {
-        
+    for (id pictureData in photoParamsArray)
+    {
         NSString *idPicture = [pictureData objectForKey:@"id"];
         [photoParamsDictonary setObject:pictureData forKey:idPicture];
         //контроллер сесси запускает запросы в отдельном потоке, отличном от
         [self.sessionController downloadPictureParams:idPicture];
-
-        
-        i++;
-        if (i>9){
-//            break;
-        }
     }
     self.dataStore.photoParams = photoParamsDictonary;
 }
 
 
-//из последовательной очереди делегата сессии (один поток)
+/**
+ Обработка результата запроса по доступным размерам картинки и ее названием
+
+ @param data JSON со списком размеров рисунка
+ @param error информация об ошибках
+ @param idPicture идентификатор рисунка
+ */
 - (void) proceedPictureParamsDownload:(NSData *)data error:(NSError * _Nullable)error idPicture:(NSString *)idPicture
 {
     if (!data)
     {
-//        [self.controller performSelectorOnMainThread:@selector(showErrorAlert) withObject:nil waitUntilDone:NO];
         return;
     }
     
@@ -75,7 +74,7 @@
     NSString *pictureURLmin = [[size objectAtIndex:0] objectForKey:@"source"];
     NSString *pictureURLmax;
     for(int i = 0; i < [size count] ; i++ ){
-        if ( [[[size objectAtIndex:i] objectForKey:@"height"] integerValue] >= 600){
+        if ( [[[size objectAtIndex:i] objectForKey:@"height"] integerValue] >= 150){
             pictureURLmax = [[size objectAtIndex:i] objectForKey:@"source"];
             break;
         }
@@ -88,19 +87,34 @@
     
     [self.dataStore.pictureURLs setObject:@{@"min":pictureURLmin, @"max":pictureURLmax} forKey:idPicture];
     
-    NSLog(@"%@",pictureURLmin);
-
     [self.sessionController dowloadPictureWithURL:pictureURLmin idPicture:idPicture];
 }
 
 
+/**
+ Запрос на загрузку рисунка
 
-//из последовательной очереди делегата сессии (один поток)
+
+ @param maxPictureURL URL рисунка выбранного размера
+ @param idPicture идентификатор рисунка
+ */
+- (void) downloadMaxPictureWithURL:(NSString *)maxPictureURL idPicture:(NSString *)idPicture
+{
+    [self.dataStore.maxPhotoStartDownload setObject:@"Startged download" forKey:idPicture];
+    [self.sessionController downloadMaxPictureWithURL:(NSString *)maxPictureURL idPicture:(NSString *)idPicture];
+}
+
+/**
+ Загрузка рисунка
+
+ @param data данные рисунка
+ @param error информация об ошибках
+ @param idPicture идентификатор рисунка
+ */
 - (void) proceedPictureWithURLDownload:(NSData *)data error:(NSError * _Nullable)error idPicture:(NSString *)idPicture
 {
     if (!data)
     {
-        //        [self.controller performSelectorOnMainThread:@selector(showErrorAlert) withObject:nil waitUntilDone:NO];
         return;
     }
     
@@ -111,13 +125,16 @@
     
 }
 
-- (void) downloadMaxPictureWithURL:(NSString *)maxPictureURL idPicture:(NSString *)idPicture
-{
-    [self.dataStore.maxPhotoStartDownload setObject:@"Startged download" forKey:idPicture];
-    [self.sessionController downloadMaxPictureWithURL:(NSString *)maxPictureURL idPicture:(NSString *)idPicture];
-    
-}
 
+
+
+/**
+ Обработка результата загрузки большой картинки для фильтра
+
+ @param data полученные данные большой картинки
+ @param error ошибка, если была, полученая при загрузке
+ @param idPicture идентификатор рисунка
+ */
 - (void) proceedMaxPictureWithURLDownload:(NSData *)data error:(NSError * _Nullable)error idPicture:(NSString *)idPicture
 {
     if (!data)
@@ -128,10 +145,12 @@
     
     [self.dataStore.maxPhotoNSData setValue:data forKey:idPicture];
     [self.dataStore.pictureIds addObject:idPicture];
-    
-//    [self.controller performSelectorOnMainThread:@selector(reloadCollectionView) withObject:nil waitUntilDone:NO ];
-    
 }
+
+
+
+
+
 
 #pragma mark - NSURLSessionDownloadDelegate
 
@@ -141,14 +160,11 @@
  * removed when the delegate message returns. URLSession:task:didCompleteWithError: will
  * still be called.
  */
-
-//сессия запускает метод в той очереди, которая указана в настройках сессии, только если не указан блок completionHendler
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
 didFinishDownloadingToURL:(NSURL *)location
 {
-    
-    
     NSData *pictureData = [NSData dataWithContentsOfURL:location];
+    
     if(pictureData){
         [self.dataStore.maxPhotoStartDownload setObject:@"Download complete" forKey:downloadTask.accessibilityLabel];
     }
@@ -157,8 +173,9 @@ didFinishDownloadingToURL:(NSURL *)location
         [self.dataStore.maxPhotoStartDownload removeObjectForKey:downloadTask.accessibilityLabel];
 
     }
+    
     [self.dataStore.maxPhotoNSData setValue:pictureData forKey:downloadTask.accessibilityLabel];
-    NSLog(@"100%");
+    NSLog(@"100%%");
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.pictureViewController showPicture];
     });
@@ -172,26 +189,11 @@ didFinishDownloadingToURL:(NSURL *)location
 totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 {
     double progress = (double)totalBytesWritten / (double)totalBytesExpectedToWrite;
-//    NSLog(@"%f - %@",progress, downloadTask  );
-//    NSLog(@"%f%",progress * 100);
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.pictureViewController showProgress:(double)progress];
     });
 
 }
-
-/* Sent when a download has been resumed. If a download failed with an
- * error, the -userInfo dictionary of the error will contain an
- * NSURLSessionDownloadTaskResumeData key, whose value is the resume
- * data.
- */
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
- didResumeAtOffset:(int64_t)fileOffset
-expectedTotalBytes:(int64_t)expectedTotalBytes
-{
-
-    
-}
-
 
 @end

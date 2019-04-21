@@ -10,6 +10,7 @@
 		E944A3BB2263CA7700EE545C /* SessionController.m in Sources */ = {isa = PBXBuildFile; fileRef = E944A3BA2263CA7700EE545C /* SessionController.m */; };
 		E944A3BE2263E53600EE545C /* PictureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E944A3BD2263E53600EE545C /* PictureViewController.m */; };
 		E944A3C12265A1F300EE545C /* FilterButton.m in Sources */ = {isa = PBXBuildFile; fileRef = E944A3C02265A1F300EE545C /* FilterButton.m */; };
+		E944A45A226B998300EE545C /* NotificationGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = E944A459226B998300EE545C /* NotificationGenerator.m */; };
 		E9C0614C225E91CC00BB0FAD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C0614B225E91CC00BB0FAD /* AppDelegate.m */; };
 		E9C0614F225E91CC00BB0FAD /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C0614E225E91CC00BB0FAD /* ViewController.m */; };
 		E9C06154225E91D100BB0FAD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9C06153225E91D100BB0FAD /* Assets.xcassets */; };
@@ -18,7 +19,6 @@
 		E9C06165225EF9D700BB0FAD /* SearchBarDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C06164225EF9D700BB0FAD /* SearchBarDelegate.m */; };
 		E9C06169225F651600BB0FAD /* DataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C06168225F651600BB0FAD /* DataStore.m */; };
 		E9C0616C225F665600BB0FAD /* DownloadController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C0616B225F665600BB0FAD /* DownloadController.m */; };
-		E9C061EB2262486600BB0FAD /* ThreadSafeDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C061EA2262486600BB0FAD /* ThreadSafeDataStore.m */; };
 		E9C061F222634AE900BB0FAD /* CollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E9C061F122634AE900BB0FAD /* CollectionViewCell.m */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +29,8 @@
 		E944A3BD2263E53600EE545C /* PictureViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PictureViewController.m; sourceTree = "<group>"; };
 		E944A3BF2265A1F300EE545C /* FilterButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterButton.h; sourceTree = "<group>"; };
 		E944A3C02265A1F300EE545C /* FilterButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FilterButton.m; sourceTree = "<group>"; };
+		E944A458226B998300EE545C /* NotificationGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationGenerator.h; sourceTree = "<group>"; };
+		E944A459226B998300EE545C /* NotificationGenerator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationGenerator.m; sourceTree = "<group>"; };
 		E9C06147225E91CC00BB0FAD /* NSURLSessionTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NSURLSessionTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9C0614A225E91CC00BB0FAD /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E9C0614B225E91CC00BB0FAD /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -44,8 +46,6 @@
 		E9C06168225F651600BB0FAD /* DataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DataStore.m; sourceTree = "<group>"; };
 		E9C0616A225F665600BB0FAD /* DownloadController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadController.h; sourceTree = "<group>"; };
 		E9C0616B225F665600BB0FAD /* DownloadController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadController.m; sourceTree = "<group>"; };
-		E9C061E92262486600BB0FAD /* ThreadSafeDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadSafeDataStore.h; sourceTree = "<group>"; };
-		E9C061EA2262486600BB0FAD /* ThreadSafeDataStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ThreadSafeDataStore.m; sourceTree = "<group>"; };
 		E9C061F022634AE900BB0FAD /* CollectionViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CollectionViewCell.h; sourceTree = "<group>"; };
 		E9C061F122634AE900BB0FAD /* CollectionViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CollectionViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -74,6 +74,8 @@
 				E944A3BA2263CA7700EE545C /* SessionController.m */,
 				E944A3BC2263E53600EE545C /* PictureViewController.h */,
 				E944A3BD2263E53600EE545C /* PictureViewController.m */,
+				E944A458226B998300EE545C /* NotificationGenerator.h */,
+				E944A459226B998300EE545C /* NotificationGenerator.m */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -115,8 +117,6 @@
 			children = (
 				E9C06167225F651600BB0FAD /* DataStore.h */,
 				E9C06168225F651600BB0FAD /* DataStore.m */,
-				E9C061E92262486600BB0FAD /* ThreadSafeDataStore.h */,
-				E9C061EA2262486600BB0FAD /* ThreadSafeDataStore.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -201,11 +201,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E944A45A226B998300EE545C /* NotificationGenerator.m in Sources */,
 				E9C06169225F651600BB0FAD /* DataStore.m in Sources */,
 				E944A3BE2263E53600EE545C /* PictureViewController.m in Sources */,
 				E9C06165225EF9D700BB0FAD /* SearchBarDelegate.m in Sources */,
 				E9C0614F225E91CC00BB0FAD /* ViewController.m in Sources */,
-				E9C061EB2262486600BB0FAD /* ThreadSafeDataStore.m in Sources */,
 				E9C0615A225E91D100BB0FAD /* main.m in Sources */,
 				E9C0614C225E91CC00BB0FAD /* AppDelegate.m in Sources */,
 				E9C061F222634AE900BB0FAD /* CollectionViewCell.m in Sources */,
@@ -347,7 +347,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = NSURLSessionTest/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -364,7 +364,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = NSURLSessionTest/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

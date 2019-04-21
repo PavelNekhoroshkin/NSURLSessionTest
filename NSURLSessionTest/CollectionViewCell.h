@@ -7,12 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ViewController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CollectionViewCell : UICollectionViewCell
+@interface CollectionViewCell : UICollectionViewCell// <UIPickerViewDelegate,UIPickerViewDataSource>
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *titleLabel;
+@property (nonatomic, strong) NSArray<NSString *> *pickerViewData;
+@property (nonatomic, strong) NSIndexPath *indexPath;
+@property (nonatomic, strong) ViewController *controller;
 @end
 
 NS_ASSUME_NONNULL_END

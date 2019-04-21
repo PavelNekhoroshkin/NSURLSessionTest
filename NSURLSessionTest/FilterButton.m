@@ -8,6 +8,10 @@
 
 #import "FilterButton.h"
 
+
+/**
+ Вспомогательный интерфейс для кнопок фильтров
+ */
 @implementation FilterButton
 
 - (instancetype)init
